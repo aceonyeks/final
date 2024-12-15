@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library Borrowing System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        label, input, button {
+            display: block;
+            margin: 10px 0;
+        }
+        #book-details, #group-details {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Library Borrowing System</h1>
+    
+    <h2>Borrow a Book</h2>
+    <form id="borrow-form">
+        <label for="borrow-student-id">Student ID:</label>
+        <input type="number" id="borrow-student-id" required>
+
+        <label for="borrow-book-id">Book ID:</label>
+        <input type="number" id="borrow-book-id" required>
+
+        <button type="submit">Borrow Book</button>
+    </form>
+
+    <div id="book-details"></div> <!-- To display the borrowed book details -->
+
+    <h2>Return a Book</h2>
+    <form id="return-form">
+        <label for="return-student-id">Student ID:</label>
+        <input type="number" id="return-student-id" required>
+
+        <label for="return-book-id">Book ID:</label>
+        <input type="number" id="return-book-id" required>
+
+        <button type="submit">Return Book</button>
+    </form>
+
+    <h2>Get Group Name</h2>
+    <form id="group-form">
+        <label for="group-student-id">Student ID:</label>
+        <input type="number" id="group-student-id" required>
+        
+        <button type="submit">Get Group</button>
+    </form>
+
+    <div id="group-details"></div> <!-- To display the group name -->
+
+    <script>
+        // Borrow Book Form
+        document.getElementById('borrow-form').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            
+            const studentId = document.getElementById('borrow-student-id').value;
+            const bookId = document.getElementById('borrow-book-id').value;
+
+            const response = await fetch('/borrow', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ student_id: studentId, book_id: bookId })
+            });
+
+            const result = await response.json();
+            alert(result.message || result.error);
+
+            // Display the book details
+            if (result.bookDetails) {
+                displayBookDetails(result.bookDetails);
+            }
+        });
+
+        // Return Book Form
+        document.getElementById('return-form').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const studentId = document.getElementById('return-student-id').value;
+            const bookId = document.getElementById('return-book-id').value;
+
+            const response = await fetch('/return', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ student_id: studentId, book_id: bookId })
+            });
+
+            const result = await response.json();
+            alert(result.message || result.error);
+
+            // Display the returned book details
+            if (result.bookDetails) {
+                displayBookDetails(result.bookDetails);
+            }
+        });
+
+        // Function to display book details
+        function displayBookDetails(book) {
+            const bookDetailsDiv = document.getElementById('book-details');
+            bookDetailsDiv.innerHTML = `
+                <h3>Book Details:</h3>
+                <p><strong>Title:</strong> ${book.book_title}</p>
+                <p><strong>ISBN:</strong> ${book.isbn}</p>
+                <p><strong>Publisher ID:</strong> ${book.publisher_id}</p>
+                <p><strong>Book Format:</strong> ${book.book_format}</p>
+                <p><strong>Pages:</strong> ${book.pages}</p>
+                <p><strong>Published:</strong> ${book.published}</p>
+                <p><strong>Year:</strong> ${book.year}</p>
+            `;
+        }
+
+        // Group Form
+        document.getElementById('group-form').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const studentId = document.getElementById('group-student-id').value;
+
+            const response = await fetch('/groups', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ student_id: studentId })
+            });
+
+            const result = await response.json();
+            alert(result.message || result.error);
+
+            // Display the group details
+            if (result.message) {
+                displayGroupDetails(result.message);
+            }
+        });
+
+        // Function to display group details
+        function displayGroupDetails(group) {
+            const groupDetailsDiv = document.getElementById('group-details');
+            groupDetailsDiv.innerHTML = `
+                <h3>Group Details:</h3>
+                <p>${group}</p>
+            `;
+        }
+    </script>
+
+</body>
+</html>
